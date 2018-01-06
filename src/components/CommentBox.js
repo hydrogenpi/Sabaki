@@ -166,10 +166,8 @@ class CommentTitle extends Component {
 }
 
 class CommentText extends Component {
-    shouldComponentUpdate({board, comment}) {
+    shouldComponentUpdate({comment}) {
         return comment !== this.props.comment
-            || board.width !== this.props.board.width
-            || board.height !== this.props.board.height
     }
 
     render({comment}) {
@@ -216,13 +214,18 @@ class CommentBox extends Component {
     }
 
     componentWillReceiveProps({treePosition, mode}) {
-        if (mode === 'edit') return
+        let treePositionChanged = treePosition !== this.props.treePosition
+
+        if (mode === 'edit') {
+            this.element.scrollTop = 0
+            if (treePositionChanged) this.textareaElement.scrollTop = 0
+
+            return
+        }
 
         // Debounce rendering
 
         this.dirty = true
-
-        let treePositionChanged = treePosition !== this.props.treePosition
 
         clearTimeout(this.updateId)
         this.updateId = setTimeout(() => {
@@ -232,11 +235,6 @@ class CommentBox extends Component {
                 this.setState({
                     board: gametree.getBoard(...this.props.treePosition)
                 })
-
-                if (this.props.mode === 'edit') {
-                    this.element.scrollTop = 0
-                    if (treePositionChanged) this.textareaElement.scrollTop = 0
-                }
 
                 this.element.scrollTop = 0
             } else {
